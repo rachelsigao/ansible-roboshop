@@ -1,0 +1,52 @@
+- name: configure dispatch component
+  hosts: dispatch
+  become: yes
+
+  tasks:
+  - name: Install Golang
+    ansible.builtin.dnf:
+      name: golang
+      state: present
+      
+  - name: create app directory
+    ansible.builtin.file:
+      path: /app
+      state: directory
+
+  - name: create roboshop system user
+    ansible.builtin.user:
+      name: roboshop
+      shell: /sbin/nologin
+      system: true
+      home: /app
+
+  - name: download dispatch code
+    ansible.builtin.get_url:
+      url: https://roboshop-artifacts.s3.amazonaws.com/dispatch-v3.zip 
+      dest: /tmp/dispatch.zip
+
+  # this module thinks file exist on ansible control server, needs to extract on to remote machine
+  - name: extract dispatch code
+    ansible.builtin.unarchive:
+      src: /tmp/dispatch.zip
+      dest: /app
+      remote_src: yes # remote_src: yes means files already exist in dispatch server
+  - name: install dependencies
+    community.general.npm:
+      path: /app
+
+  - name: copy dispatch service to system directory
+    ansible.builtin.copy:
+      src: dispatch.service
+      dest: /etc/systemd/system/dispatch.service
+
+  - name: systemctl deamon reload
+    ansible.builtin.systemd_service:
+      daemon_reload: true
+
+  - name: start and enable dispatch
+    ansible.builtin.service:
+      name: dispatch
+      state: started
+      enabled: yes
+

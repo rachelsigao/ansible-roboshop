@@ -10,7 +10,7 @@
     - maven
     - mysql
     
-  - name: install PyMySQL and cryptography 
+  - name: install PyMySQL and cryptography # PyMySQL facilitates Python-based MySQL connections, while cryptography is required for secure authentication 
     ansible.builtin.pip:
       name: "{{ item }}"
       executable: pip3.9
@@ -70,7 +70,7 @@
   #   community.mysql.mysql_info:
   #     login_user: shipping
   #     login_password: RoboShop@1
-  #     login_host: mysql.daws84s.site
+  #     login_host: mysql.rachelsigao.online
   #     login_db: cities
 
   - name: import data
@@ -80,7 +80,7 @@
       name: all
       login_user: root
       login_password: RoboShop@1
-      login_host: mysql.daws84s.site
+      login_host: mysql.rachelsigao.online
       state: import
       target: "{{ item }}"
     loop:
@@ -92,8 +92,9 @@
     tags:
     - import
     ansible.builtin.service:
-      state: restarted
       name: shipping
+      state: restarted
+      
   
 
 

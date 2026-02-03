@@ -31,16 +31,28 @@
       src: /tmp/dispatch.zip
       dest: /app
       remote_src: yes # remote_src: yes means files already exist in dispatch server
-  - name: install dependencies
-    community.general.npm:
-      path: /app
+  
+  - name: Initialize Go module
+    ansible.builtin.command: go mod init dispatch
+    args:
+      chdir: /app
+
+  - name: Download Go dependencies
+    ansible.builtin.command: go get
+    args:
+      chdir: /app
+
+  - name: Build Go application
+    ansible.builtin.command: go build
+    args:
+      chdir: /app
 
   - name: copy dispatch service to system directory
     ansible.builtin.copy:
       src: dispatch.service
       dest: /etc/systemd/system/dispatch.service
 
-  - name: systemctl deamon reload
+  - name: systemctl daemon reload
     ansible.builtin.systemd_service:
       daemon_reload: true
 
